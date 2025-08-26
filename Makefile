@@ -1,12 +1,19 @@
-.PHONY: all build run
-
-EXE = main
+.PHONY: all build run clean
 
 run: build
-	./$(EXE)
+	./bin/main
 
-build: $(EXE)
+build: bin/main
 
-main: main.c
-	gcc -o main main.c
+clean:
+	rm -r bin/ opcode.c
 
+bin:
+	mkdir -p bin
+
+bin/main: main.c opcode.c bin
+	gcc -o bin/main main.c
+
+opcode.c: generate_opcode.c bin
+	gcc -o bin/generate_opcode generate_opcode.c
+	./bin/generate_opcode > opcode.c

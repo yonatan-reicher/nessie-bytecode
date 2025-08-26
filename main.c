@@ -2,47 +2,32 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "opcode.c"
 
-
-typedef enum Opcode : uint8_t {
-    /// Push a 4 bit value
-    SMALL_PUSH,
-    /// Push a 12 bit value
-    PUSH,
-    /// Add the two values on top and a 4 bit value
-    SMALL_ADD,
-    /// Add the two values on top and a 12 bit value
-    ADD,
-} Opcode;
-
-
-bool opcode_has_arg2(Opcode op) {
-    switch (op) {
-        case SMALL_PUSH: return false;
-        case PUSH: return true;
-        case SMALL_ADD: return false;
-        case ADD: return true;
-    }
-}
-
-
-/// An instruction
+/// An instruction. The instruction is not quite represented like this in the
+/// encoding, because of alignment. The difference is that, when encoded, the
+/// instruction does not have padding between arg1 and arg2.
 typedef struct {
     Opcode op : 4;
     // arg1 is unsigned because there is no point in a 4-bit field
     uint8_t arg1 : 4;
     // arg2 may be read as signed or unsigned
     union {
-        uint8_t s;
-        int8_t u;
+        uint8_t s8;
+        int8_t u8;
+        uint16_t s16;
+        int16_t u16;
+        uint32_t s32;
+        int32_t u32;
+        uint64_t s64 : 60;
+        int64_t u64 : 60;
     } arg2;
 } Inst;
 
-#define PRInst "04"PRIx16 /* Print a 16-bit int with all 4 digits */
-
-/// Return the concatanation of arg1 and arg2
+/// Return the concatanation of arg1 and arg2 , when arg2 is 8 bits.
 uint16_t arg12(Inst inst) {
-    return (inst.arg1 << 8) + inst.arg2.u;
+    return (inst.arg1 << 8) + inst.arg2.u8;
 }
 
 
@@ -69,7 +54,7 @@ void assert_sizes() {
     ASSERT_EQ(sizeof(char), 1);
     ASSERT_EQ(sizeof(int8_t), 1);
     ASSERT_EQ(sizeof(Opcode), 1);
-    ASSERT_EQ(sizeof(Inst), 2);
+    ASSERT_EQ(sizeof(Inst), 16);
 }
 
 
@@ -80,15 +65,28 @@ Inst read_inst(FILE* input) {
         fprintf(stderr, "Error! could not read instruction from input\n");
         exit(1);
     }
-    bool read_more = opcode_has_arg2(inst.op);
-    if (read_more) {
-        n_read = fread(&inst.arg2.u, 1, 1, input);
-        if (n_read != 1) {
+    uint8_t n_bytes = opcode_n_bytes(inst.op);
+    if (n_bytes > 1) {
+        n_read = fread(&inst.arg2, n_bytes - 1, 1, input);
+        if (n_read == 0) {
             fprintf(stderr, "Error! could not read instruction from input\n");
             exit(1);
         }
     }
     return inst;
+}
+
+void print_inst(FILE* f, Inst inst) {
+    // fprintf(f, "inst: %x %x\n", *(uint32_t*)&inst, *(uint32_t*)&inst.arg2);
+    fprintf(f, "opcode: %s\n", OPCODE_NAMES[inst.op]);
+    fprintf(f, "arg1: %"PRIu8"\n", inst.arg1);
+    uint8_t bytes = opcode_n_bytes(inst.op);
+    // Clean the argument, so we don't print extra shit bits
+    uint64_t arg2 = 0;
+    memcpy(&arg2, &inst.arg2, bytes - 1);
+    if (bytes > 1) {
+    fprintf(f, "arg2: %"PRIu64"\n", arg2);
+    }
 }
 
 void start_loop() {
@@ -97,27 +95,30 @@ void start_loop() {
     size_t i = 0;
     while(1) {
         Inst inst = read_inst(stdin);
-        printf("inst %"PRInst"\n", inst);
-        printf("opcode %"PRIx8"\n", inst.op);
-        printf("arg1 %"PRIu8"\n", inst.arg1);
-        printf("arg2 %"PRIu8"\n", inst.arg2.u);
+        print_inst(stdout, inst);
         switch(inst.op) {
+        case EXIT:
+            exit(0);
+            continue;
         case SMALL_PUSH:
             stack[i++] = inst.arg1;
-            break;
+            continue;
         case PUSH:
             stack[i++] = arg12(inst);
-            break;
+            continue;
         case SMALL_ADD:
-            stack[i - 1] += stack[i] + inst.arg1;
+            stack[i - 2] += stack[i - 1] + inst.arg1;
             i--;
-            break;
+            continue;
         case ADD:
-            stack[i - 1] += stack[i] + arg12(inst);
+            stack[i - 2] += stack[i - 1] + arg12(inst);
             i--;
-            break;
+            continue;
+        case PRINT:
+            printf("%d\n", stack[--i]);
+            continue;
         }
-        fprintf(stderr, "Bad instruction! %"PRInst"\n", inst);
+        fprintf(stderr, "Bad instruction!");
         exit(1);
     }
 }
