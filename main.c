@@ -122,6 +122,16 @@ void start_loop() {
     }
 }
 
+// Some things that could be added to this project:
+// 1. Text input
+// 2. Disassembling
+// 3. Debugging
+// 4. More instructions!
+// 5. Tests
+// 6. Some example programs
+// 7. Benchmarks
+// 8. Translating to c/LLVM
+
 int main() {
     assert_sizes();
     printf("Hello world!\n");
