@@ -41,7 +41,7 @@ int main() {
     );
 
     // Output the typedef
-    printf("typedef enum Opcode : uint8_t {\n");
+    printf("typedef enum Opcode {\n");
     FOR_CASE(c, printf(TAB "%s,\n", c.name));
     printf("} Opcode;\n");
     

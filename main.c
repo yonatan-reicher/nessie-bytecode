@@ -53,7 +53,6 @@ void assert_eq(
 void assert_sizes() {
     ASSERT_EQ(sizeof(char), 1);
     ASSERT_EQ(sizeof(int8_t), 1);
-    ASSERT_EQ(sizeof(Opcode), 1);
     ASSERT_EQ(sizeof(Inst), 16);
 }
 

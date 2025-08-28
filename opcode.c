@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-typedef enum Opcode : uint8_t {
+typedef enum Opcode {
     EXIT,
     SMALL_PUSH,
     PUSH,
