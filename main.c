@@ -1,14 +1,13 @@
-#include <inttypes.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "common.c"
 #include "parse.c"
+
 
 void assert_sizes() {
     ASSERT_EQ(sizeof(char), 1);
     ASSERT_EQ(sizeof(int8_t), 1);
+    // An instruction struct is 16 bytes, because an instruction is encoded as
+    // anywhere between 1 up to 9 bytes, and in C, we want some padding when
+    // using 9 bytes.
     ASSERT_EQ(sizeof(Inst), 16);
 }
 
