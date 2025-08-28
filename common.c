@@ -51,4 +51,11 @@ void assert_eq(
     }
 }
 
+typedef bool success;
+
+typedef struct ErrorMsg {
+    bool owned; /* If this is set true, the string should be free'd */
+    char* msg;
+} ErrorMsg;
+
 #endif

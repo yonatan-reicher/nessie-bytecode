@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "common.c"
+#include "parse.c"
 
 void assert_sizes() {
     ASSERT_EQ(sizeof(char), 1);
@@ -14,18 +15,11 @@ void assert_sizes() {
 
 Inst read_inst(FILE* input) {
     Inst inst;
-    size_t n_read = fread(&inst, 1, 1, input);
-    if (n_read != 1) {
-        fprintf(stderr, "Error! could not read instruction from input\n");
+    ErrorMsg err = parse_inst(input, &inst);
+    if (err.msg) {
+        fprintf(stderr, "%s\n", err.msg);
+        // We don't care about freeing because the program is done
         exit(1);
-    }
-    uint8_t n_bytes = opcode_n_bytes(inst.op);
-    if (n_bytes > 1) {
-        n_read = fread(&inst.arg2, n_bytes - 1, 1, input);
-        if (n_read == 0) {
-            fprintf(stderr, "Error! could not read instruction from input\n");
-            exit(1);
-        }
     }
     return inst;
 }
@@ -89,7 +83,6 @@ void start_loop() {
 
 int main() {
     assert_sizes();
-    printf("Hello world!\n");
     start_loop();
     return 0;
 }
