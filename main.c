@@ -71,7 +71,7 @@ void start_loop() {
 }
 
 // Some things that could be added to this project:
-// 1. Text input
+// 1. Better text input (parse arguments according to the instruction)
 // 2. Disassembling
 // 3. Debugging
 // 4. More instructions!
@@ -79,6 +79,7 @@ void start_loop() {
 // 6. Some example programs
 // 7. Benchmarks
 // 8. Translating to c/LLVM
+// 9. Cli
 
 int main() {
     assert_sizes();
