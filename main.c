@@ -1,5 +1,6 @@
 #include "common.c"
 #include "parse.c"
+#include "cli.c"
 
 
 void assert_sizes() {
