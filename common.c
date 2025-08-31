@@ -1,6 +1,9 @@
 #ifndef COMMON_C
 #define COMMON_C
 
+// This flag enables GNU extensions like 'asprintf'.
+#define _GNU_SOURCE
+
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
