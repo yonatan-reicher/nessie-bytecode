@@ -1,12 +1,13 @@
 #ifndef COMMON_C
 #define COMMON_C
 
-#include "opcode.c"
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "opcode.c"
 
 /// An instruction. The instruction is not quite represented like this in the
 /// encoding, because of alignment. The difference is that, when encoded, the
